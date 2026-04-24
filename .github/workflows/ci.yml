@@ -1,0 +1,90 @@
+name: 🚀 Deploy Laravel (CineMap)
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  lint:
+    name: 🎨 Pint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "📦 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "⚙️  Setup PHP"
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          coverage: none
+
+      - name: "📦 Install deps"
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: "🎨 Pint"
+        run: ./vendor/bin/pint --test
+
+  deploy:
+    name: 🐳 Build & Deploy
+    runs-on: ubuntu-latest
+    needs: lint
+
+    steps:
+      - name: "📦 Checkout"
+        uses: actions/checkout@v4
+
+      - name: "🚀 Deploy on VPS via SSH"
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          port: ${{ secrets.VPS_PORT }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_PASSWORD }}
+          script: |
+            set -e
+
+            APP_NAME="cinemap"
+            APP_DIR="/var/www/html/${{ secrets.VPS_DOMAIN }}"
+            PORT=8090
+
+            echo "──────────────────────────────────────────"
+            echo "  📥  Pull des dernières modifications"
+            echo "──────────────────────────────────────────"
+            cd "$APP_DIR"
+            git fetch origin main
+            git clean -fd
+            git pull origin main
+
+            echo "──────────────────────────────────────────"
+            echo "  🐳  Rebuild de l'image Docker"
+            echo "──────────────────────────────────────────"
+            sudo docker build -t "${APP_NAME}:latest" ./TP_PHP
+
+            echo "──────────────────────────────────────────"
+            echo "  ♻️   Redémarrage du conteneur"
+            echo "──────────────────────────────────────────"
+            sudo docker stop "$APP_NAME" || true
+            sudo docker rm   "$APP_NAME" || true
+            sudo docker run -d \
+              --restart unless-stopped \
+              --name "$APP_NAME" \
+              -p ${PORT}:80 \
+              --env-file "$APP_DIR/TP_PHP/.env" \
+              "${APP_NAME}:latest"
+
+            echo "──────────────────────────────────────────"
+            echo "  🔁  Health check"
+            echo "──────────────────────────────────────────"
+            sleep 5
+            HTTP=$(curl -sk -o /dev/null -w "%{http_code}" "http://127.0.0.1:${PORT}" || echo "000")
+            if [[ "$HTTP" =~ ^(200|301|302|304)$ ]]; then
+              echo "  ✅  Health check OK — HTTP $HTTP"
+            else
+              echo "  ⚠️   Health check a échoué (Code: $HTTP)"
+              sudo docker logs "$APP_NAME"
+              exit 1
+            fi
+
+            echo "  ✅  Déploiement CineMap terminé !"
