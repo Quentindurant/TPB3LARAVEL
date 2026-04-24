@@ -54,7 +54,7 @@ jobs:
             echo "──────────────────────────────────────────"
             cd "$APP_DIR"
             git fetch origin main
-            git clean -fd
+            git clean -fd --exclude=database-prod
             git pull origin main
 
             echo "──────────────────────────────────────────"
