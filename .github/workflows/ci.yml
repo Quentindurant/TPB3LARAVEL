@@ -67,7 +67,13 @@ jobs:
             echo "──────────────────────────────────────────"
             sudo docker stop "$APP_NAME" || true
             sudo docker rm   "$APP_NAME" || true
-            sudo docker ps -q --filter "publish=${PORT}" | xargs -r sudo docker rm -f || true
+            sudo docker ps -aq | while read cid; do
+              if sudo docker inspect "$cid" 2>/dev/null | grep -q "\"${PORT}/tcp\""; then
+                sudo docker rm -f "$cid" || true
+              fi
+            done
+            sudo fuser -k ${PORT}/tcp 2>/dev/null || true
+            sleep 2
             sudo docker run -d \
               --restart unless-stopped \
               --name "$APP_NAME" \
