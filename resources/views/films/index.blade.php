@@ -4,11 +4,11 @@
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 Films
             </h2>
-            @if(auth()->user()->is_admin)
-            <a href="{{ route('films.create') }}"
-                class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-md">
-                + Nouveau film
-            </a>
+            @if (auth()->user()->is_admin)
+                <a href="{{ route('films.create') }}"
+                    class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-md">
+                    + Nouveau film
+                </a>
             @endif
         </div>
     </x-slot>
@@ -20,7 +20,7 @@
                     <table class="w-full text-left text-gray-900 dark:text-gray-100">
                         <thead class="border-b border-gray-200 dark:border-gray-700">
                             <tr>
-                                <th class="pb-3 pr-6">Titre</th>
+                                <th class="pb-3 pr-6">Titree</th>
                                 <th class="pb-3 pr-6">Année</th>
                                 <th class="pb-3 pr-6">Synopsis</th>
                                 <th class="pb-3 pr-6">Nombre de locations</th>
@@ -48,19 +48,19 @@
                                         </span>
                                     </td>
                                     <td class="py-3 flex items-center gap-2">
-                                        @if(auth()->user()->is_admin)
-                                        <a href="{{ route('films.edit', $film) }}"
-                                            class="text-sm text-yellow-600 hover:underline">
-                                            Modifier
-                                        </a>
-                                        <form action="{{ route('films.destroy', $film) }}" method="POST"
-                                            onsubmit="return confirm('Supprimer ce film ?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="text-sm text-red-600 hover:underline">
-                                                Supprimer
-                                            </button>
-                                        </form>
+                                        @if (auth()->user()->is_admin)
+                                            <a href="{{ route('films.edit', $film) }}"
+                                                class="text-sm text-yellow-600 hover:underline">
+                                                Modifier
+                                            </a>
+                                            <form action="{{ route('films.destroy', $film) }}" method="POST"
+                                                onsubmit="return confirm('Supprimer ce film ?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="text-sm text-red-600 hover:underline">
+                                                    Supprimer
+                                                </button>
+                                            </form>
                                         @endif
                                     </td>
                                 </tr>
