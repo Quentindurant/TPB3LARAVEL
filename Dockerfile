@@ -1,3 +1,10 @@
+FROM node:20-alpine AS assets
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
 FROM php:8.4-apache
 
 RUN apt-get update -qq && apt-get install -y -qq zip unzip curl sqlite3 libsqlite3-dev \
@@ -8,8 +15,10 @@ RUN apt-get update -qq && apt-get install -y -qq zip unzip curl sqlite3 libsqlit
 WORKDIR /var/www/html
 
 COPY . .
+COPY --from=assets /app/public/build ./public/build
 
-RUN composer install --no-dev --optimize-autoloader \
+RUN composer install --optimize-autoloader \
+    && touch database/database.sqlite \
     && chown -R www-data:www-data storage bootstrap/cache database
 
 RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html/public|g' \
