@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "cinemap": {
+      "type": "http",
+      "url": "https://tpb3laravel.quentindurant.com/mcp"
+    }
+  }
+}
