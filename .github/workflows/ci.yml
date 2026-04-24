@@ -17,7 +17,7 @@ jobs:
       - name: "⚙️  Setup PHP"
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.3"
+          php-version: "8.4"
           coverage: none
 
       - name: "📦 Install deps"
@@ -60,7 +60,7 @@ jobs:
             echo "──────────────────────────────────────────"
             echo "  🐳  Rebuild de l'image Docker"
             echo "──────────────────────────────────────────"
-            sudo docker build -t "${APP_NAME}:latest" ./TP_PHP
+            sudo docker build -t "${APP_NAME}:latest" .
 
             echo "──────────────────────────────────────────"
             echo "  ♻️   Redémarrage du conteneur"
@@ -71,7 +71,7 @@ jobs:
               --restart unless-stopped \
               --name "$APP_NAME" \
               -p ${PORT}:80 \
-              --env-file "$APP_DIR/TP_PHP/.env" \
+              --env-file "$APP_DIR/.env" \
               "${APP_NAME}:latest"
 
             echo "──────────────────────────────────────────"
