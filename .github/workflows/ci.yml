@@ -54,8 +54,8 @@ jobs:
             echo "──────────────────────────────────────────"
             cd "$APP_DIR"
             git fetch origin main
+            git reset --hard origin/main
             git clean -fd --exclude=database-prod
-            git pull origin main
 
             echo "──────────────────────────────────────────"
             echo "  🐳  Rebuild de l'image Docker"
