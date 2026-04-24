@@ -67,11 +67,12 @@ jobs:
             echo "──────────────────────────────────────────"
             sudo docker stop "$APP_NAME" || true
             sudo docker rm   "$APP_NAME" || true
-            sudo docker ps -a --format "{{.ID}} {{.Ports}}" \
-              | grep "${PORT}" \
-              | awk '{print $1}' \
-              | xargs -r sudo docker rm -f || true
-            sleep 2
+            for cid in $(sudo docker ps -q); do
+              if sudo docker port "$cid" 2>/dev/null | grep -q "0.0.0.0:${PORT}"; then
+                sudo docker rm -f "$cid" || true
+              fi
+            done
+            sleep 1
             sudo docker run -d \
               --restart unless-stopped \
               --name "$APP_NAME" \
